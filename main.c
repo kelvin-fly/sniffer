@@ -25,6 +25,7 @@
 
 int rawSocket();
 int setPromisc(char *,int *);
+unsigned short checksum(unsigned short *buf16, int nword);
 
 //int rval;                 //the number of receiving bytes,we need a local varvible
 
@@ -157,7 +158,18 @@ int main(int argc,char **argv)
 			fwrite(bp,4,1,f);
 
 			fwrite(buf,rval,1,f);
+			volatile unsigned short *buf16;
+			buf16 = (unsigned short *)(buf + sizeof(struct ether_header));
+			int ck = checksum(buf16, 10);
+			printf("the checksum is:%x\n",ck);
+//			fprintf();
+
+//			struct iphdr *ip;
+//			ip = (struct iphdr *)(buf + sizeof(struct ether_header));
+//			printf("the  is:%d\n",ip->protocol);
+//			printf("ttl:%d\n",ip->ttl);
 			fclose(f);
+			
         }
 
 		else
@@ -197,3 +209,22 @@ int setPromisc(char *enterface,int *sock)
     printf("set '%s' to promisc successed!\n",enterface);
     return 1;
 }
+
+unsigned short checksum(unsigned short *buf16, int nword)
+{
+unsigned long sum;
+struct iphdr *iphdr;
+iphdr = (struct iphdr *)buf16;
+iphdr->check = 0;
+//printf("%x\n",iphdr->check);
+//printf("tt%d\n",iphdr->ttl);
+//printf("%d\n",iphdr->protocol);
+for(sum = 0; nword > 0; nword--)
+sum += *buf16++;
+
+sum = (sum>>16) + (sum&0xffff);
+sum += (sum>>16);
+
+return htons(~sum);   //this is checksum!!! rember byte-order!!!
+}
+
