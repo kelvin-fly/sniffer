@@ -1,1 +1,3 @@
-first use row socket get packet .then varify the checksum
+in main.c first use row socket get packet .then varify the checksum
+
+in http_fea.c It's base on main.c,then print GET's pages immediately
