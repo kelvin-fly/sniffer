@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <net/ethernet.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
@@ -224,3 +225,58 @@ http_fea(unsigned char *bufht, int nword)
 	}
 
 }
+
+int insertrecord(char * dm)
+{
+     MYSQL my_connection;
+
+      int res;
+      char *server = "localhost";
+      char *user = "root";
+      char *password = "1";   // your mysql's password
+      char *database = "record";
+      char vbf[200];
+
+    mysql_init(&my_connection); 
+
+    /*mysql_real_connect(&mysql,host,user,passwd,dbname,0,NULL,0) == NULL)*/
+    if (mysql_real_connect(&my_connection, server,
+          user, password, database, 0, NULL, 0)) 
+    {
+         //printf("Connection success\n");
+         strcpy(vbf,"insert into user values('10.8.1.49','");
+        strcat(vbf,getdaynow());
+        strcat(vbf,"','");
+        strcat(vbf,gettimenow());
+        strcat(vbf,"','");
+        strcat(vbf,dm);
+        strcat(vbf,"')");
+
+         res = mysql_query(&my_connection, (char *)vbf);
+
+             if (!res) 
+              {
+                  bzero(vbf,sizeof(vbf));
+                //  printf("Inserted %lu rows\n",(unsigned long)mysql_affected_rows(&my_connection));
+            /*里头的函数返回受表中影响的行数*/
+              } 
+              else 
+              {
+                //分别打印出错误代码及详细信息
+                  fprintf(stderr, "Insert error %d: %s\n",mysql_errno(&my_connection),mysql_error(&my_connection));
+          }
+             mysql_close(&my_connection);
+    } 
+    else 
+    {
+            fprintf(stderr, "Connection failed\n");
+
+            if (mysql_errno(&my_connection)) 
+         {
+             fprintf(stderr, "Connection error %d: %s\n",mysql_errno(&my_connection),mysql_error(&my_connection));
+              }
+    }
+       return EXIT_SUCCESS;
+
+}
+
