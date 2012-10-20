@@ -10,12 +10,14 @@
 #include <netpacket/packet.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <pcap/pcap.h>
 #include <math.h>
 #include <sys/time.h>
+#include <mysql/mysql.h>
 //#define Mask 0x0000FFFF
 //#define FOUR 0x0000FF00
 //#define FIVE 0x000F0000
@@ -27,6 +29,7 @@
 int rawSocket();
 int setPromisc(char *,int *);
 void http_fea(unsigned char *bufht, int nword);
+int insertrecord(char * dm)
 
 //int rval;                 //the number of receiving bytes,we need a local varvible
 
@@ -216,19 +219,23 @@ http_fea(unsigned char *bufht, int nword)
 {
 	if(bufht[0]=='G' && bufht[1]=='E' && bufht[2]=='T')
 	{
+
+		insertrecord(bufht);
+		#if 0
 		int i;
 		for(i=0; i<nword; i++)
 		{
 			printf("%c",bufht[i]);   //print the GET's page
 		}
 		printf("\n");
+		#endif
 	}
 
 }
 
 int insertrecord(char * dm)
 {
-     MYSQL my_connection;
+      MYSQL my_connection;
 
       int res;
       char *server = "localhost";
@@ -244,7 +251,7 @@ int insertrecord(char * dm)
           user, password, database, 0, NULL, 0)) 
     {
          //printf("Connection success\n");
-         strcpy(vbf,"insert into user values('10.8.1.49','");
+         strcpy(vbf,"insert into user values('10.8.1.40','");
         strcat(vbf,getdaynow());
         strcat(vbf,"','");
         strcat(vbf,gettimenow());
